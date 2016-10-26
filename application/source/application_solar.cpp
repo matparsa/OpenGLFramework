@@ -45,10 +45,7 @@ std::vector<ApplicationSolar::planet> planetVector = {sun,earth,mercury,venus, m
 
 std::random_device rd;
 //container for all star coordinates
-std::vector<float> starVector;
-
-
-
+std::vector<float> stars;
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
  ,planet_object{}
@@ -59,19 +56,18 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   std::uniform_real_distribution<float> dis(-2.0f, 2.0f);
 
   for(int j = 0; j< numberOfStars; j++){
-
-        starVector.push_back( dis(gen) );
-        starVector.push_back( dis(gen) );
-        starVector.push_back( dis(gen) );
-        starVector.push_back( 1.0f );
-        starVector.push_back( 1.0f );
-        starVector.push_back( 0.0f );
-         std::cout <<  dis(gen) << "";
-
+		//Position
+        stars.push_back( dis(gen) );
+        stars.push_back( dis(gen) );
+        stars.push_back( dis(gen) );
+		//Color
+        stars.push_back( 1.0f );
+        stars.push_back( 1.0f );
+        stars.push_back( 0.0f );
   }
 
   planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
-  star_model  = {starVector, model::POSITION | model::NORMAL};
+  star_model  = {stars, model::POSITION | model::NORMAL};
 
   initializeGeometry();
   initializeShaderPrograms();
