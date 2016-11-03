@@ -130,12 +130,10 @@ void ApplicationSolar::upload_planet_transforms(planet  &p) const{
 
 
 void ApplicationSolar::render() const {
-
-
-
-  // bind shader to upload uniforms
- //glUseProgram(m_shaders.at("planet").handle);
-
+ // draw stars
+  glUseProgram(m_shaders.at("star").handle);
+  glBindVertexArray(star_object.vertex_AO);
+  glDrawArrays(GL_POINTS, 0, numberOfStars);
   // bind the VAO to draw
   glBindVertexArray(planet_object.vertex_AO);
 
@@ -146,10 +144,7 @@ void ApplicationSolar::render() const {
   }
 
 //
- // draw stars
-  glUseProgram(m_shaders.at("star").handle);
-  glBindVertexArray(star_object.vertex_AO);
-  glDrawArrays(GL_POINTS, 0, numberOfStars);
+
 
 }
 
