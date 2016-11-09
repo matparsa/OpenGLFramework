@@ -1,6 +1,6 @@
 #include "application_solar.hpp"
 #include "launcher.hpp"
-
+#include <iostream>
 #include "utils.hpp"
 #include "shader_loader.hpp"
 #include "model_loader.hpp"
@@ -17,18 +17,19 @@ using namespace gl;
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <iostream>
+
 #include <random>
 
 model planet_model{};
 model star_model{};
-
+bool celMode;
 model_object star_object;
-
+char test='s';
 int numberOfStars=2000;
 // initializing of planets
  /*name{n},size{s},color{1.0f, 1.0f, 1.0f},rot_speed{r},dist2origin{d},moon{m} {};*/
-ApplicationSolar::planet sun     {"sun"    , 0.7f,  {1.0f, 0.8f , 0.0f}, 0.0f,         0.0f,       };
+ApplicationSolar::planet sun0     {"sun"    , 0.7f,  {1.0f, 1.0f , 0.0f}, 0.0f,         900.0f,       };
+ApplicationSolar::planet sun     {"sun"    , 0.7f,  {1.0f, 1.0f , 0.0f}, 0.0f,         0.0f,       };
 ApplicationSolar::planet mercury {"mercury", 0.05f,  {0.5f, 0.5f , 0.5f}, 365/88.0f,    15.0f,     };
 ApplicationSolar::planet venus   {"venus"  , 0.2f,  {0.5f, 0.5f , 0.5f}, 365/225.0f,   18.0f, true };
 ApplicationSolar::planet earth   {"earth"  , 0.15f, {0.1f, 0.4f , 0.7f}, 1.0f,         21.0f, true };
@@ -80,7 +81,8 @@ void ApplicationSolar::upload_planet_transforms(planet  &p) const{
 
    // bind shader to upload uniforms
   glUseProgram(m_shaders.at("planet").handle);
-
+//Planet color
+  //glUniform3f(m_shaders.at("planet").u_locs.at("ColorVector"), p.color[0],p.color[1],p.color[2]);
   p.model = glm::rotate(glm::fmat4{}, float(glfwGetTime() * p.rot_speed), glm::fvec3{0.0f, 1.0f, 0.0f});
 
   p.model = glm::scale(p.model, glm::vec3(p.size));
@@ -89,8 +91,8 @@ void ApplicationSolar::upload_planet_transforms(planet  &p) const{
 
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                      1, GL_FALSE, glm::value_ptr(p.model));
-
-  // extra matrix for normal transformation to keep them orthogonal to surface
+  //Planet color
+  glUniform3f(m_shaders.at("planet").u_locs.at("ColorVector"), p.color[0],p.color[1],p.color[2]);
   glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * p.model);
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
                      1, GL_FALSE, glm::value_ptr(normal_matrix));
@@ -114,7 +116,7 @@ void ApplicationSolar::upload_planet_transforms(planet  &p) const{
 
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                        1, GL_FALSE, glm::value_ptr(model_matrix));
-
+glUniform3f(m_shaders.at("planet").u_locs.at("ColorVector"), 1.0f,1.0f,0.0f);
     // extra matrix for normal transformation to keep them orthogonal to surface
     glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
@@ -150,9 +152,20 @@ void ApplicationSolar::render() const {
 
 
 void ApplicationSolar::updateView() {
-  // vertices are transformed in camera space, so camera transform must be inverted
+   // vertices are transformed in camera space, so camera transform must be inverted
   glm::fmat4 view_matrix = glm::inverse(m_view_transform);
-  // upload matrix to gpu
+
+  glUseProgram(m_shaders.at("planet").handle);
+  glm::vec4 sun = {0.0f, 0.0f, 0.0f, 1.0f};
+  sun = view_matrix * sun;
+  glUniform3f(m_shaders.at("planet").u_locs.at("LightSource"), sun.x, sun.y, sun.z);
+
+  //upload uniform of sun position
+ // glm::vec3 sunPos = {0.0f, 0.0f, 0.0f};
+
+  //glUniform3f(m_shaders.at("planet").u_locs.at("LightSource"), sunPos.x, sunPos.y, sunPos.z);
+
+   // upload matrix to gpu
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
                      1, GL_FALSE, glm::value_ptr(view_matrix));
 
@@ -228,6 +241,7 @@ void ApplicationSolar::keyCallback(int key, int scancode, int action, int mods) 
     m_view_transform = glm::rotate(m_view_transform, 0.05f, glm::fvec3{0.0f, 1.0f, 0.0f});
     updateView();
   }
+
 }
 
 //handle delta mouse movement input
@@ -249,7 +263,8 @@ void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
 
 // load shader programs
 void ApplicationSolar::initializeShaderPrograms() {
-  // store shader program objects in container
+
+      // store shader program objects in container
   m_shaders.emplace("planet", shader_program{m_resource_path + "shaders/simple.vert",
                                            m_resource_path + "shaders/simple.frag"});
   // request uniform locations for shader program
@@ -257,7 +272,8 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
   m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
   m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
-
+  m_shaders.at("planet").u_locs["ColorVector"]=-1;
+  m_shaders.at("planet").u_locs["LightSource"]=-1;
   // store Star shader program objects in container
     m_shaders.emplace("star", shader_program{m_resource_path + "shaders/stars.vert",
                                            m_resource_path + "shaders/stars.frag"});
