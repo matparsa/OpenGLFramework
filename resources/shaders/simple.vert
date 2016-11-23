@@ -3,6 +3,7 @@
 // vertex attributes of VAO
 layout(location = 0) in vec3 in_Position;
 layout(location = 1) in vec3 in_Normal;
+layout(location = 2) in vec2 in_TexCoord;
 
 //Matrix Uniforms as specified with glUniformMatrix4fv
 uniform mat4 ModelMatrix;
@@ -15,17 +16,19 @@ uniform vec3 LightSource;
 
 out vec3 pass_Normal;
 out vec3 pass_Color;
-out vec3 pass_LightVec;
-out vec3 pass_ViewerVec;
+out vec3 pass_LightVector;
+out vec3 pass_ViewerVector;
+out vec2 pass_TexCoord;
 
 void main(void)
 {
 	gl_Position = (ProjectionMatrix  * ViewMatrix * ModelMatrix) * vec4(in_Position, 1.0);
 	pass_Normal = (NormalMatrix * vec4(in_Normal, 0.0)).xyz;
-    //calculating vertex position in View Space and pass to Fragment Shader
-	vec3 position = vec3((ViewMatrix * ModelMatrix) * vec4(in_Position, 1.0f));
-	// vectors need to be normalized
-  	pass_LightVec = normalize(LightSource - position.xyz);
-  	pass_ViewerVec = normalize(- position.xyz);
+
+	vec3 planet_Position = vec3((ViewMatrix * ModelMatrix) * vec4(in_Position, 1.0f));
+  	pass_LightVector = normalize(LightSource - planet_Position.xyz);
+  	pass_ViewerVector = normalize(- planet_Position.xyz);
+
 	pass_Color  = ColorVector;
+	pass_TexCoord = in_TexCoord;
 }
