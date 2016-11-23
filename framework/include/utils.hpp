@@ -2,7 +2,7 @@
 #define UTILS_HPP
 
 #include <glbinding/gl/types.h>
-// use gl definitions from glbinding 
+// use gl definitions from glbinding
 using namespace gl;
 
 struct pixel_data;
@@ -10,7 +10,7 @@ struct texture_object;
 
 namespace utils {
   // generate texture object from texture struct
-  texture_object create_texture_object(pixel_data const& tex);
+  texture_object create_texture_object(pixel_data const& tex,int index);
   // print bound textures for all texture units
   void print_bound_textures();
 
