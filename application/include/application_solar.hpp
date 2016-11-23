@@ -8,6 +8,7 @@
 // gpu representation of model
 class ApplicationSolar : public Application {
  public:
+  // defining struct with properties for the planets
   struct planet{
 
   std::string name;
@@ -16,7 +17,6 @@ class ApplicationSolar : public Application {
   float rot_speed;
   float dist2origin;
   bool moon;
-  glm::fmat4 model;
 
   planet(std::string n, float s, float r, float d, bool m = false):
         name{n},
@@ -34,6 +34,8 @@ class ApplicationSolar : public Application {
         dist2origin{d},
         moon{m} {};
 };
+
+
   // allocate and initialize objects
   ApplicationSolar(std::string const& resource_path);
   // free allocated objects
@@ -45,20 +47,22 @@ class ApplicationSolar : public Application {
   void updateProjection();
   // react to key input
   void keyCallback(int key, int scancode, int action, int mods);
+  //handle delta mouse movement input
   void mouseCallback(double pos_x, double pos_y);
-
+  //void glfwGetCursorPos( double xpos, double ypos);
   // draw all objects
   void render() const;
-  void upload_planet_transforms(planet  &p) const;
-  void drawOrbit(glm::mat4 model_matrix) const;
+  void upload_planet_transforms(planet  &p,  texture_object const& tex_obj) const;
 
  protected:
   void initializeShaderPrograms();
-  void initializeGeometry();
+  void initializeGeometry(model& mdl, model_object& object);
   void updateView();
-
+  //GLuint loadTexture(pixel_data const& tex) const;
   // cpu representation of model
   model_object planet_object;
+  model_object star_object;
+
 };
 
 #endif
