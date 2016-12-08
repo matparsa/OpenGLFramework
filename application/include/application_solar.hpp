@@ -56,7 +56,10 @@ class ApplicationSolar : public Application {
   void initializeShaderPrograms();
   void initializeGeometry();
   void updateView();
-
+   void rendBuffer(GLsizei width, GLsizei height);
+    void frameBuffer(GLsizei width, GLsizei height);
+    void initializeScreenquad();
+    void renderScreenQuad() const;
   // cpu representation of model
   model_object planet_object;
 };
